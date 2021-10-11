@@ -345,12 +345,31 @@ namespace Onenote2md.Core
 
                     case "Bullet":
                         {
-                            var parentPreviousNode = node.Parent.PreviousNode;
+                            var parentNode = node.Parent;
+                            var parentPreviousNode = parentNode.PreviousNode;
+                            var preText = "";
+                            while (parentNode != null)
+                            {
+                                var quickStyleIndex = parentNode.Attribute("quickStyleIndex");
+                                var children = new List<string> { "h1", "h2", "h3", "h4", "h5" };
+                                if (quickStyleIndex != null && children.Any(quickStyleIndex.Value.Contains))
+                                {
+                                    break;
+                                }
+                                if (parentNode.Name.LocalName.Equals("OEChildren"))
+                                {
+                                    preText += "  ";
+                                }
+                                parentNode = parentNode.Parent;
+                            }
+                            
                             if (parentPreviousNode == null ||
                                 NormalizeName(((XElement)parentPreviousNode).Name.ToString()) != "Tag")
                             {
-                                content.Append("- ");
+                                preText = preText.Substring(2) + "- ";
                             }
+                            
+                            content.Append(preText);
                         }
                         break;
 
