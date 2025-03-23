@@ -113,8 +113,6 @@ namespace Onenote2md.Core
             return nodeName;
         }
 
-
-
         public string GetObjectId(Microsoft.Office.Interop.OneNote.HierarchyScope scope, string objectName)
         {
             return GetObjectId(null, scope, objectName);
@@ -320,8 +318,6 @@ namespace Onenote2md.Core
             }
         }
 
-
-
         public string GetPageContent(string sectionId, string pageId)
         {
             string xml;
@@ -330,8 +326,6 @@ namespace Onenote2md.Core
             var doc = XDocument.Parse(xml);
             return xml;
         }
-
-
 
     }
 }

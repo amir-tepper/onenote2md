@@ -1,6 +1,7 @@
 ﻿using Onenote2md.Shared;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -169,7 +170,6 @@ namespace Onenote2md.Core
             }
         }
 
-
         public void GenerateNotebookMD(string notebookName, IWriter writer)
         {
             var notebookId = parser.GetObjectId(
@@ -216,7 +216,6 @@ namespace Onenote2md.Core
             var titleElement = GetTitleElement(doc);
             GenerateChildObjectMD(titleElement, context, 0, mdContent);
 
-
             var childenContent = DoGenerateMDRoots("OEChildren", doc, context);
             if (String.IsNullOrWhiteSpace(childenContent))
             {
@@ -228,7 +227,6 @@ namespace Onenote2md.Core
             {
                 mdContent.Append(childenContent);
             }
-
 
             markdownPage.Content = mdContent.ToString();
             markdownPage.Title = context.GetPageTitle();
@@ -423,8 +421,6 @@ namespace Onenote2md.Core
                         }
                         break;
 
-
-
                     case "Table":
                         {
                             if (context.HasPairedContent())
@@ -494,7 +490,6 @@ namespace Onenote2md.Core
                             {
                                 // how we get here?
                             }
-
                         }
                         break;
 
@@ -509,7 +504,6 @@ namespace Onenote2md.Core
                             {
                                 // how we get here?
                             }
-
                         }
                         break;
 
@@ -527,12 +521,10 @@ namespace Onenote2md.Core
                             var width = GetAttibuteValue(node, "width");
                             var height = GetAttibuteValue(node, "height");
 
-
-                            var w = Convert.ToDecimal(width);
-                            var h = Convert.ToDecimal(height);
+                            var w = Convert.ToDecimal(width, CultureInfo.InvariantCulture);
+                            var h = Convert.ToDecimal(height, CultureInfo.InvariantCulture);
 
                             context.ImageDef.SetDimensions(w, h);
-
                         }
                         break;
 
@@ -557,7 +549,6 @@ namespace Onenote2md.Core
                             content.Append(image);
                             context.ImageDef.Reset();
 
-
                         }
                         break;
 
@@ -573,8 +564,6 @@ namespace Onenote2md.Core
                             var newName = GetAttibuteValue(node, "preferredName");
                             var fullPath = context.GetInsertedFilePath(newName);
 
-
-                          
                             File.Copy(oldPathAndName, fullPath);
 
                             var altText = newName;
@@ -587,8 +576,6 @@ namespace Onenote2md.Core
                             content.Append(insertedFile);
                         }
                         break;
-
-
 
                     default:
                         break;
