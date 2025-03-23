@@ -532,23 +532,29 @@ namespace Onenote2md.Core
                         {
                             var id = GetAttibuteValue(node, "callbackID");
 
-                            string stringValue;
-                            onenoteApp.GetBinaryPageContent(context.ParentId, id, out stringValue);
+                            try
+                            {
+                                string stringValue;
+                                onenoteApp.GetBinaryPageContent(context.ParentId, id, out stringValue);
 
-                            if (!context.ImageDef.IsWithinImage())
-                                context.ImageDef.SetWithinImage("png");
+                                if (!context.ImageDef.IsWithinImage())
+                                    context.ImageDef.SetWithinImage("png");
 
-                            var fullPath = context.GetPageImageFullPath();
-                            var bytes = Convert.FromBase64String(stringValue);
-                            context.Writer.WritePageImage(fullPath, bytes);
+                                var fullPath = context.GetPageImageFullPath();
+                                var bytes = Convert.FromBase64String(stringValue);
+                                context.Writer.WritePageImage(fullPath, bytes);
 
-                            var imageFilename = context.GetPageImageFilename();
-                            var contentRelativePath = $"file://{imageFilename}";
-                            var image = $"![{imageFilename}]({contentRelativePath})";
+                                var imageFilename = context.GetPageImageFilename();
+                                var contentRelativePath = $"file://{imageFilename}";
+                                var image = $"![{imageFilename}]({contentRelativePath})";
 
-                            content.Append(image);
-                            context.ImageDef.Reset();
+                                content.Append(image);
+                                context.ImageDef.Reset();
+                            }
+                            catch (Exception ex)
+                            {
 
+                            }
                         }
                         break;
 
