@@ -15,26 +15,21 @@ namespace Onenote2md.Shared
                 return MarkdownContent.Empty();
             else
             {
-                switch (Name)
+                switch ((TagDefType)int.Parse(Type))
                 {
-                    case "To Do":
-                    case "Teendő":
+                    case TagDefType.ToDo:
                         return MarkdownContent.SingleContent("[ ] ");
 
-                    case "Important":
-                    case "Fontos":
+                    case TagDefType.Important:
                         return MarkdownContent.SingleContent(":star: ");
 
-                    case "Question":
-                    case "Kérdés":
+                    case TagDefType.Question:
                         return MarkdownContent.SingleContent(":question: ");
 
-                    case "Critical":
-                    case "Kritikus":
+                    case TagDefType.Critical:
                         return MarkdownContent.SingleContent(":exclamation: ");
 
-                    case "Idea":
-                    case "Ötlet":
+                    case TagDefType.Idea:
                         return MarkdownContent.SingleContent(":bulb: ");
 
 

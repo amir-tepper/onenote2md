@@ -55,6 +55,7 @@
     <Compile Include="TableDef.cs" />
     <Compile Include="TagDef.cs" />
     <Compile Include="QuickStyleDef.cs" />
+    <Compile Include="TagDefType.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

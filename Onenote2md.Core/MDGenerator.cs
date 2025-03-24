@@ -339,7 +339,6 @@ namespace Onenote2md.Core
                 string name = NormalizeName(node.Name.ToString());
                 bool stdTraversal = true;
 
-
                 StringBuilder content = new StringBuilder();
                 switch (name)
                 {
@@ -403,7 +402,7 @@ namespace Onenote2md.Core
 
                             if (tagDef != null)
                             {
-                                if (tagDef.Name.Equals("To Do", StringComparison.InvariantCultureIgnoreCase))
+                                if (TagDefType.ToDo.Equals((TagDefType)int.Parse(tagDef.Type)))
                                 {
                                     var completed = GetAttibuteValue(node, "completed");
                                     if (completed == "true")
