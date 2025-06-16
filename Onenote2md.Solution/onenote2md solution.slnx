@@ -1,0 +1,20 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="..\Doc\Objects.docx" />
+    <File Path="..\README.md" />
+  </Folder>
+  <Folder Name="/Solution Items/samples/" Id="ecb74076-c495-b12e-f898-ec3a6200cade">
+    <File Path="..\Doc\samples\headings.md" />
+    <File Path="..\Doc\samples\images.md" />
+    <File Path="..\Doc\samples\other styles.md" />
+    <File Path="..\Doc\samples\rich content.md" />
+    <File Path="..\Doc\samples\rich table.md" />
+    <File Path="..\Doc\samples\simple table.md" />
+    <File Path="..\Doc\samples\tags.md" />
+    <File Path="..\Doc\samples\task list.md" />
+  </Folder>
+  <Project Path="..\Onenote2md.Cmd\Onenote2md.Cmd.csproj" Id="fad90f91-5af6-4af1-bc01-6b8cba901017" />
+  <Project Path="..\Onenote2md.Core\Onenote2md.Core.csproj" Id="5b6ba0da-3c84-4e2b-a8e4-89eaff50e2f8" />
+  <Project Path="..\Onenote2md.Shared\Onenote2md.Shared.csproj" Id="26b757e0-4879-4d55-a079-3ab0470f12f3" />
+  <Project Path="..\Onenote2md.Tester\Onenote2md.Tester.csproj" Id="8d59075c-590c-4339-83ca-40a15c69eb8b" />
+</Solution>
