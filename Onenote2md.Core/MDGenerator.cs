@@ -239,8 +239,8 @@ namespace Onenote2md.Core
         {
             var result = new StringBuilder();
 
-            var children = doc.Descendants(ns + rootNodeName).FirstOrDefault();
-            if (children != null && children.HasElements)
+            var children = doc.Descendants(ns + rootNodeName);
+            if (children != null)
             {
                 var rootElements = children
                     .Elements()
