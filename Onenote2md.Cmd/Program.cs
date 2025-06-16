@@ -1,9 +1,6 @@
 ﻿using Onenote2md.Core;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Onenote2md.Cmd
 {
@@ -26,7 +23,6 @@ namespace Onenote2md.Cmd
                     }
                     break;
 
-
                 case 2:
                     {
                         notebookName = args[0];
@@ -38,7 +34,6 @@ namespace Onenote2md.Cmd
                     ShowHelp();
                     return;
             }
-
 
             var notebookParser = new NotebookParser();
             var writer = new MDWriter(outputDirectory, true);

@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace Onenote2md.Core
@@ -40,7 +38,6 @@ namespace Onenote2md.Core
             onenoteApp.CloseNotebook(notebookId);
         }
 
-
         public XDocument GetXDocument(string parentId, Microsoft.Office.Interop.OneNote.HierarchyScope scope)
         {
             string xml;
@@ -56,25 +53,24 @@ namespace Onenote2md.Core
 
             switch (scope)
             {
-                case (Microsoft.Office.Interop.OneNote.HierarchyScope.hsNotebooks):
+                case Microsoft.Office.Interop.OneNote.HierarchyScope.hsNotebooks:
                     nodeName = "Notebook";
                     break;
 
-                case (Microsoft.Office.Interop.OneNote.HierarchyScope.hsPages):
+                case Microsoft.Office.Interop.OneNote.HierarchyScope.hsPages:
                     nodeName = "Page";
                     break;
 
-                case (Microsoft.Office.Interop.OneNote.HierarchyScope.hsSections):
+                case Microsoft.Office.Interop.OneNote.HierarchyScope.hsSections:
                     nodeName = "Section";
                     break;
 
-                case (Microsoft.Office.Interop.OneNote.HierarchyScope.hsChildren):
+                case Microsoft.Office.Interop.OneNote.HierarchyScope.hsChildren:
                     nodeName = "OEChildren";
                     break;
 
-
                 default:
-                    return nodeName = "";
+                    return "";
             }
 
             return nodeName;
@@ -107,7 +103,7 @@ namespace Onenote2md.Core
                     break;
 
                 default:
-                    return nodeName = "";
+                    return "";
             }
 
             return nodeName;
@@ -126,15 +122,15 @@ namespace Onenote2md.Core
 
             switch (scope)
             {
-                case (Microsoft.Office.Interop.OneNote.HierarchyScope.hsNotebooks):
+                case Microsoft.Office.Interop.OneNote.HierarchyScope.hsNotebooks:
                     nodeName = "Notebook";
                     break;
 
-                case (Microsoft.Office.Interop.OneNote.HierarchyScope.hsPages):
+                case Microsoft.Office.Interop.OneNote.HierarchyScope.hsPages:
                     nodeName = "Page";
                     break;
 
-                case (Microsoft.Office.Interop.OneNote.HierarchyScope.hsSections):
+                case Microsoft.Office.Interop.OneNote.HierarchyScope.hsSections:
                     nodeName = "Section";
                     break;
 
@@ -220,7 +216,6 @@ namespace Onenote2md.Core
             return result;
         }
 
-
         public string GetChildObjectID(string parentId, string objectID)
         {
             var doc = GetXDocument(parentId, Microsoft.Office.Interop.OneNote.HierarchyScope.hsChildren);
@@ -240,7 +235,6 @@ namespace Onenote2md.Core
 
             return null;
         }
-
 
         public List<string> LogChildObjects(string parentId)
         {
@@ -283,7 +277,6 @@ namespace Onenote2md.Core
             if (node != null)
             {
                 string name = NormalizeName(node.Name.ToString());
-
 
                 string content = "";
                 switch (name)

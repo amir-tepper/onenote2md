@@ -33,7 +33,6 @@ namespace Onenote2md.Shared
                     case TagDefType.Idea:
                         return MarkdownContent.SingleContent(":bulb: ");
 
-
                     default:
                         return MarkdownContent.SingleContent(":red_circle: ");
                 }
