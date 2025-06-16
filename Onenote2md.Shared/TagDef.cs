@@ -18,6 +18,7 @@ namespace Onenote2md.Shared
                 switch ((TagDefType)int.Parse(Type))
                 {
                     case TagDefType.ToDo:
+                    case TagDefType.ToDo2:
                         return MarkdownContent.SingleContent("[ ] ");
 
                     case TagDefType.Important:

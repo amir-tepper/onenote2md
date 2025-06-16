@@ -402,7 +402,8 @@ namespace Onenote2md.Core
 
                             if (tagDef != null)
                             {
-                                if (TagDefType.ToDo.Equals((TagDefType)int.Parse(tagDef.Type)))
+                                var tagDefType = (TagDefType)int.Parse(tagDef.Type);
+                                if (TagDefType.ToDo.Equals(tagDefType) || TagDefType.ToDo2.Equals(tagDefType))
                                 {
                                     var completed = GetAttibuteValue(node, "completed");
                                     if (completed == "true")
