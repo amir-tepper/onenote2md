@@ -385,8 +385,9 @@ namespace Onenote2md.Core
 
                     case "Bullet":
                         {
-                            if (node.Parent.PreviousNode != null &&
-                                NormalizeName(((XElement)node.Parent.PreviousNode).Name.ToString()) != "Tag")
+                            var parentPreviousNode = node.Parent.PreviousNode;
+                            if (parentPreviousNode == null ||
+                                NormalizeName(((XElement)parentPreviousNode).Name.ToString()) != "Tag")
                             {
                                 content.Append("- ");
                             }
