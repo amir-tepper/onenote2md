@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Onenote2md.Shared
 {
@@ -16,7 +12,6 @@ namespace Onenote2md.Shared
         MarkdownContent lastContent;
         string pageTitle;
         IWriter writer;
-
 
         public MarkdownGeneratorContext(
             IWriter writer,
@@ -121,6 +116,7 @@ namespace Onenote2md.Shared
         public string GetPageFullPath()
         {
             var outputDirectory = writer.GetOutputDirectory();
+            outputDirectory = StringHelper.Sanitize(outputDirectory);
             EnsureDirectoryExists(outputDirectory);
 
             var fullPath = Path.Combine(outputDirectory, GetPageFilename());
@@ -130,6 +126,7 @@ namespace Onenote2md.Shared
         public string GetInsertedFilePath(string fileName)
         {
             var outputDirectory = writer.GetOutputDirectory();
+            outputDirectory = StringHelper.Sanitize(outputDirectory);
             EnsureDirectoryExists(outputDirectory);
 
             var fullPath = Path.Combine(outputDirectory, fileName);
@@ -144,15 +141,16 @@ namespace Onenote2md.Shared
             return fullPath;
         }
 
-            public string GetPageImageFullPath()
+        public string GetPageImageFullPath()
         {
             var outputDirectory = writer.GetOutputDirectory();
+            outputDirectory = StringHelper.Sanitize(outputDirectory);
             EnsureDirectoryExists(outputDirectory);
+            
             var filename = ImageDef.GetFilename(pageTitle);
 
             return Path.Combine(outputDirectory, FileHelper.MakeValidFileName(filename));
         }
-
 
         public string GetPageImageFilename()
         {
@@ -164,6 +162,7 @@ namespace Onenote2md.Shared
         public ImageDef ImageDef { get { return imageDef; } }
 
         public string ParentId { get; private set; }
+        
         public IWriter Writer { get { return writer; } }
     }
 }

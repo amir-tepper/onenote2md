@@ -16,12 +16,6 @@ namespace Onenote2md.Core
         private NotebookParser parser;
         private XNamespace ns;
         private Microsoft.Office.Interop.OneNote.Application onenoteApp;
-
-        static Dictionary<string, string> spanReplacements = new Dictionary<string, string>()
-        {
-            { "<span style='font-weight:bold'>", " **" },
-            { "<span style='font-weight:bold;text-decoration:underline'>", " **" }
-        };
         #endregion
 
         #region Constructors
@@ -48,47 +42,13 @@ namespace Onenote2md.Core
 
             return source;
         }
-
-        protected string TextReplacement(string source)
-        {
-            return source.Replace("&nbsp;**", "**");
-        }
-
-        protected string ReplaceMultiline(string source)
-        {
-            return source.Replace("\n", " ");
-        }
-
-        protected string ConvertSpanToMd(string source)
-        {
-            foreach (var item in spanReplacements)
-            {
-                if (source.Contains(item.Key))
-                {
-                    source = source.Replace(item.Key, item.Value);
-                    source = source.Replace("** ", "**");
-                    source = source.Replace("</span>&nbsp;", item.Value.Trim());
-                    source = source.Replace("</span>", item.Value.Trim());
-                    //source = source.Replace("&nbsp;>", " ");
-                    break;
-                }
-            }
-
-            return source;
-        }
-
+        
         protected string GetAttibuteValue(XElement element, string attributeName)
         {
             var v = element.Attributes().Where(q => q.Name == attributeName).FirstOrDefault();
             if (v != null)
                 return v.Value;
-            else
-                return null;
-        }
-
-        protected string GetElementValue(XElement element)
-        {
-            return element.Value;
+            return null;
         }
         #endregion
 
@@ -375,10 +335,11 @@ namespace Onenote2md.Core
 
                     case "T":
                         {
-                            string v = ReplaceMultiline(node.Value);
+                            string v = StringHelper.ReplaceMultiline(node.Value);
 
-                            v = ConvertSpanToMd(v);
-                            v = TextReplacement(v);
+                            v = StringHelper.ConvertSpanToMd(v);
+                            v = StringHelper.TextReplacement(v);
+                            v = HttpUtility.HtmlDecode(v);
                             content.Append(v);
                         }
                         break;
@@ -586,9 +547,6 @@ namespace Onenote2md.Core
 
                             content.Append(insertedFile);
                         }
-                        break;
-
-                    default:
                         break;
                 }
 
