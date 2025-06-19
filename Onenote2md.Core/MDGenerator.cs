@@ -176,7 +176,7 @@ namespace Onenote2md.Core
             var titleElement = GetTitleElement(doc);
             GenerateChildObjectMD(titleElement, context, 0, mdContent);
 
-            var childenContent = DoGenerateMDRoots("OEChildren", doc, context);
+            var childenContent = DoGenerateMDRoots("Outline", doc, context);
             if (String.IsNullOrWhiteSpace(childenContent))
             {
                 var directImageContent = DoGenerateMDRoots("Image", doc, context);
@@ -199,8 +199,8 @@ namespace Onenote2md.Core
         {
             var result = new StringBuilder();
 
-            var children = doc.Descendants(ns + rootNodeName).FirstOrDefault();
-            if (children != null && children.HasElements)
+            var children = doc.Descendants(ns + rootNodeName);
+            if (children != null)
             {
                 var rootElements = children
                     .Elements()
