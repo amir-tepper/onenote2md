@@ -381,6 +381,16 @@ namespace Onenote2md.Core
 
                     case "Tag":
                         {
+                            var parentNode = node.Parent;
+                            while (parentNode != null)
+                            {
+                                if (parentNode.Name.LocalName.Equals("OEChildren"))
+                                {
+                                    content.Append("  ");
+                                }
+                                parentNode = parentNode.Parent;
+                            }
+                            
                             var tagIndex = GetAttibuteValue(node, "index");
                             var tagDef = context.GetTagDef(tagIndex);
 
