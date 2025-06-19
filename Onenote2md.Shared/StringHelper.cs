@@ -1,36 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Xml.Linq;
+using System.Linq;
+using HtmlAgilityPack;
 
 namespace Onenote2md.Shared
 {
     public static class StringHelper
     {
-        static Dictionary<string, string> spanReplacements = new Dictionary<string, string>()
-        {
-            { "<span style='font-weight:bold'>", " **" },
-            { "<span style='font-weight:bold;text-decoration:underline'>", " **" },
-            { "<span lang=hu>", "" },
-            { "<span lang=en-US>", "" },
-        };
         
         public static string Sanitize(String str)
         {
             str = str.Replace("^J", ",");
             str = str.Replace("\n", " ");
-            str = str.Replace("<span lang=hu>", "");
-            str = str.Replace("</span>", "");
             return str;
         }
 
         public static string ReplaceSlash(String str)
         {
             return str.Replace('/', '\uFF0F');
-        }
-        
-        public static string TextReplacement(string source)
-        {
-            return source.Replace("&nbsp;**", "**");
         }
 
         public static string ReplaceMultiline(string source)
@@ -40,20 +26,45 @@ namespace Onenote2md.Shared
         
         public static string ConvertSpanToMd(string source)
         {
-            foreach (var item in spanReplacements)
+            if (!source.Contains("<span"))
             {
-                if (source.Contains(item.Key))
+                return source;
+            }
+
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(source);
+
+            foreach (var spanNode in htmlDoc.DocumentNode.Descendants("span").ToList())
+            {
+                var newTextNode = htmlDoc.CreateTextNode(ProcessSpanStyles(spanNode));
+                spanNode.ParentNode.ReplaceChild(newTextNode, spanNode);
+            }
+
+            return htmlDoc.DocumentNode.OuterHtml;
+        }
+        
+        private static string ProcessSpanStyles(HtmlNode spanNode)
+        {
+            var text = spanNode.InnerText;
+        
+            if (!spanNode.Attributes.Contains("style"))
+            {
+                return text;
+            }
+
+            var styles = spanNode.GetAttributeValue("style", "").Replace(": ", ":").Split(';');
+            foreach (var style in styles)
+            {
+                switch (style)
                 {
-                    source = source.Replace(item.Key, item.Value);
-                    source = source.Replace("** ", "**");
-                    source = source.Replace("</span>&nbsp;", item.Value.Trim());
-                    source = source.Replace("</span>", item.Value.Trim());
-                    //source = source.Replace("&nbsp;>", " ");
-                    break;
+                    case "text-decoration:line-through": text = "~~" + text + "~~"; break;
+                    case "text-decoration:underline": text = "<u>" + text + "</u>"; break;
+                    case "font-style:italic;": text = "*" + text + "*"; break;
+                    case "font-weight:bold": text = "**" + text + "**"; break;
                 }
             }
 
-            return source;
+            return text;
         }
     }
 }

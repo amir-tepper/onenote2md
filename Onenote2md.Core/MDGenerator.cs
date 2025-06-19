@@ -338,7 +338,6 @@ namespace Onenote2md.Core
                             string v = StringHelper.ReplaceMultiline(node.Value);
 
                             v = StringHelper.ConvertSpanToMd(v);
-                            v = StringHelper.TextReplacement(v);
                             v = HttpUtility.HtmlDecode(v);
                             content.Append(v);
                         }
