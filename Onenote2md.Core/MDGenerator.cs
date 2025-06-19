@@ -22,7 +22,7 @@ namespace Onenote2md.Core
         public MDGenerator(NotebookParser parser)
         {
             this.parser = parser;
-            this.onenoteApp = this.parser.GetOneNoteApp();
+            onenoteApp = this.parser.GetOneNoteApp();
 
             var doc = parser.GetXDocument(
                 null, Microsoft.Office.Interop.OneNote.HierarchyScope.hsNotebooks);
@@ -238,7 +238,6 @@ namespace Onenote2md.Core
                     def.Name = GetAttibuteValue(item, "name");
                     result.Add(def.Index, def);
                 }
-
             }
 
             return result;
@@ -276,7 +275,7 @@ namespace Onenote2md.Core
             {
                 var title = element.Descendants(ns + "OE").FirstOrDefault();
                 if (title != null)
-                    return title.Value.ToString();
+                    return title.Value;
             }
 
             return result;
@@ -310,11 +309,7 @@ namespace Onenote2md.Core
                                 context.Reset();
                             }
 
-                            if (context.TableInfo.IsOnTable())
-                            {
-
-                            }
-                            else
+                            if (!context.TableInfo.IsOnTable())
                             {
                                 var quickStyleIndex = GetAttibuteValue(node, "quickStyleIndex");
                                 if (!String.IsNullOrEmpty(quickStyleIndex))
@@ -336,9 +331,8 @@ namespace Onenote2md.Core
                     case "T":
                         {
                             string v = StringHelper.ReplaceMultiline(node.Value);
-
-                            v = StringHelper.ConvertSpanToMd(v);
                             v = HttpUtility.HtmlDecode(v);
+                            v = StringHelper.ConvertSpanToMd(v);
                             content.Append(v);
                         }
                         break;
@@ -480,10 +474,6 @@ namespace Onenote2md.Core
 
                                 results.Append(" |");
                             }
-                            else
-                            {
-                                // how we get here?
-                            }
                         }
                         break;
 
@@ -493,10 +483,6 @@ namespace Onenote2md.Core
                             {
                                 content.Append(" | ");
                                 //context.Set(new MarkdownContent("|", true));
-                            }
-                            else
-                            {
-                                // how we get here?
                             }
                         }
                         break;
