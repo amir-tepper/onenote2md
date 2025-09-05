@@ -116,21 +116,58 @@ namespace Onenote2md.Core
         {
             if (!String.IsNullOrEmpty(sectionId))
             {
-                var pageIds = parser.GetChildObjectIds(
-                    sectionId, Microsoft.Office.Interop.OneNote.HierarchyScope.hsChildren,
-                    ObjectType.Page);
+                // Get all Page elements in order, with their ID, name, and pageLevel
+                var doc = parser.GetXDocument(sectionId, Microsoft.Office.Interop.OneNote.HierarchyScope.hsChildren);
+                var ns = doc.Root.Name.Namespace;
+                var pages = doc.Descendants(ns + "Page")
+                    .Select(p => new {
+                        Id = p.Attribute("ID")?.Value,
+                        Name = p.Attribute("name")?.Value,
+                        PageLevel = int.TryParse(p.Attribute("pageLevel")?.Value, out int lvl) ? lvl : 1
+                    })
+                    .Where(p => !string.IsNullOrEmpty(p.Id) && !string.IsNullOrEmpty(p.Name))
+                    .ToList();
 
+                // Stack to track parent page names for folder structure
+                var parentStack = new Stack<(int Level, string Name)>();
+
+                writer.PushDirectory(sectionName);
                 try
                 {
-                    writer.PushDirectory(sectionName);
-
-                    foreach (var pageId in pageIds)
+                    for (int i = 0; i < pages.Count; i++)
                     {
-                        GeneratePageMD(pageId, writer);
+                        var page = pages[i];
+                        // Pop to the correct parent level
+                        while (parentStack.Count > 0 && parentStack.Peek().Level >= page.PageLevel)
+                        {
+                            writer.PopDirectory();
+                            parentStack.Pop();
+                        }
+                        // For subpages, push parent chain
+                        if (page.PageLevel > 1)
+                        {
+                            // Find the parent page (the nearest previous page with level one less)
+                            int parentIdx = i - 1;
+                            while (parentIdx >= 0 && pages[parentIdx].PageLevel != page.PageLevel - 1)
+                                parentIdx--;
+                            if (parentIdx >= 0 && (parentStack.Count == 0 || parentStack.Peek().Name != pages[parentIdx].Name))
+                            {
+                                writer.PushDirectory(pages[parentIdx].Name);
+                                parentStack.Push((pages[parentIdx].PageLevel, pages[parentIdx].Name));
+                            }
+                        }
+                        // Write the page in the current directory
+                        GeneratePageMD(page.Id, writer);
                     }
                 }
                 finally
                 {
+                    // Pop any remaining directories
+                    while (parentStack.Count > 0)
+                    {
+                        writer.PopDirectory();
+                        parentStack.Pop();
+                    }
                     writer.PopDirectory();
                 }
             }

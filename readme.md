@@ -1,4 +1,23 @@
 ﻿# onenote2md
+
+## Subpage Export Example
+If you have a section and pages structured as:
+
+section1
+  page1
+    subpage2
+      subsubpage3
+
+The exported folder and file structure will be:
+
+section1/
+  page1.md
+  page1/
+    subpage2.md
+    subpage2/
+      subsubpage3.md
+
+Subpages are only written inside their parent page's folder, not at the section root.
 An automated tool to convert OneNote notebooks to markdown files. :+1:
 
 # Features
