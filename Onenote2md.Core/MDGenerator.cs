@@ -119,10 +119,11 @@ namespace Onenote2md.Core
                 // Get all Page elements in order, with their ID, name, and pageLevel
                 var doc = parser.GetXDocument(sectionId, Microsoft.Office.Interop.OneNote.HierarchyScope.hsChildren);
                 var ns = doc.Root.Name.Namespace;
+
                 var pages = doc.Descendants(ns + "Page")
                     .Select(p => new {
                         Id = p.Attribute("ID")?.Value,
-                        Name = p.Attribute("name")?.Value,
+                        Name = SanitizeName(p.Attribute("name")?.Value),
                         PageLevel = int.TryParse(p.Attribute("pageLevel")?.Value, out int lvl) ? lvl : 1
                     })
                     .Where(p => !string.IsNullOrEmpty(p.Id) && !string.IsNullOrEmpty(p.Name))
@@ -171,6 +172,15 @@ namespace Onenote2md.Core
                     writer.PopDirectory();
                 }
             }
+        }
+
+        // Remove leading/trailing spaces and illegal path characters from page/section names
+        private static string SanitizeName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return name;
+            var trimmed = name.Trim();
+            var invalid = Path.GetInvalidFileNameChars();
+            return string.Concat(trimmed.Where(c => !invalid.Contains(c)));
         }
 
         public void GenerateSectionGroupMD(string sectionGroupId, string sectionGroupName, IWriter writer)
@@ -577,23 +587,31 @@ namespace Onenote2md.Core
                         {
                             var id = GetAttibuteValue(node, "callbackID");
 
-                            string stringValue;
-                            onenoteApp.GetBinaryPageContent(context.ParentId, id, out stringValue);
+                            try
+                            {
+                                string stringValue;
+                                onenoteApp.GetBinaryPageContent(context.ParentId, id, out stringValue);
 
-                            if (!context.ImageDef.IsWithinImage())
-                                context.ImageDef.SetWithinImage("png");
+                                if (!context.ImageDef.IsWithinImage())
+                                    context.ImageDef.SetWithinImage("png");
 
-                            var fullPath = context.GetPageImageFullPath();
-                            var bytes = Convert.FromBase64String(stringValue);
-                            context.Writer.WritePageImage(fullPath, bytes);
+                                var fullPath = context.GetPageImageFullPath();
+                                var bytes = Convert.FromBase64String(stringValue);
+                                context.Writer.WritePageImage(fullPath, bytes);
 
-                            var imageFilename = context.GetPageImageFilename();
-                            var contentRelativePath = $"file://{imageFilename}";
-                            var image = $"![{imageFilename}]({contentRelativePath})";
+                                var imageFilename = context.GetPageImageFilename();
+                                var contentRelativePath = $"file://{imageFilename}";
+                                var image = $"![{imageFilename}]({contentRelativePath})";
 
-                            content.Append(image);
+                                content.Append(image);
+                                
+                            }
+                            catch
+                            {
+                                content.Append("<<<Image_Issue>>>");
+                            }
+
                             context.ImageDef.Reset();
-
 
                         }
                         break;
