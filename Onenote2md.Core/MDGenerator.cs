@@ -1,4 +1,7 @@
-﻿using Onenote2md.Shared;
+﻿
+
+    // ...existing code...
+using Onenote2md.Shared;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -89,6 +92,21 @@ namespace Onenote2md.Core
         {
             return element.Value;
         }
+
+        // Extracts and concatenates inner text from all <span>...</span> tags, ignoring attributes
+        public static string ExtractSpanText(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return string.Empty;
+
+            var matches = System.Text.RegularExpressions.Regex.Matches(input, @"<span[^>]*>(.*?)</span>", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+            if (matches.Count == 0)
+            {
+                return input;
+            }
+            var result = string.Join(" ", matches.Cast<System.Text.RegularExpressions.Match>().Select(m => m.Groups[1].Value.Trim()).Where(s => !string.IsNullOrEmpty(s)));
+            return result.Trim();
+        }
         #endregion
 
         #region IGenerator
@@ -174,13 +192,45 @@ namespace Onenote2md.Core
             }
         }
 
-        // Remove leading/trailing spaces and illegal path characters from page/section names
+        // Remove leading/trailing spaces, illegal path characters, and tag-like patterns from page/section names
         private static string SanitizeName(string name)
         {
-            if (string.IsNullOrWhiteSpace(name)) return name;
-            var trimmed = name.Trim();
-            var invalid = Path.GetInvalidFileNameChars();
-            return string.Concat(trimmed.Where(c => !invalid.Contains(c)));
+            if (string.IsNullOrWhiteSpace(name))
+                return "Untitled";
+
+            // Remove leading/trailing whitespace
+            name = name.Trim();
+
+
+            // Remove all attribute patterns (e.g., lang=he, style='...', etc.)
+            // Handles: lang=he, style='...', style="...", style=word
+            name = System.Text.RegularExpressions.Regex.Replace(name, @"\b\w+\s*=\s*'[^']*'", "");
+            name = System.Text.RegularExpressions.Regex.Replace(name, @"\b\w+\s*=\s*""[^""]*""", "");
+            name = System.Text.RegularExpressions.Regex.Replace(name, @"\b\w+\s*=\s*[^\s]+", "");
+
+            // Remove all standalone tag names (e.g., span, spanspanstyle) at word boundaries
+            name = System.Text.RegularExpressions.Regex.Replace(name, @"\b(span|spanspanstyle)\b", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+            // Collapse multiple spaces
+            name = System.Text.RegularExpressions.Regex.Replace(name, @"\s+", " ");
+
+            // Remove any leftover angle brackets (if any)
+            name = name.Replace("<", "").Replace(">", "");
+
+            // Remove illegal path characters
+            foreach (char c in System.IO.Path.GetInvalidFileNameChars())
+            {
+                name = name.Replace(c, '_');
+            }
+
+            // Final trim
+            name = name.Trim();
+
+            // If the result is empty, return Untitled
+            if (string.IsNullOrWhiteSpace(name))
+                return "Untitled";
+
+            return name;
         }
 
         public void GenerateSectionGroupMD(string sectionGroupId, string sectionGroupName, IWriter writer)
@@ -359,16 +409,15 @@ namespace Onenote2md.Core
         {
             var nodeName = "Title";
 
-            var result = "";
             var element = doc.Descendants(ns + nodeName).FirstOrDefault();
             if (element != null)
             {
                 var title = element.Descendants(ns + "OE").FirstOrDefault();
                 if (title != null)
-                    return title.Value.ToString();
+                    return ExtractSpanText(title.Value.ToString());
             }
 
-            return result;
+            return "Untitled";
         }
 
         protected XElement GetTitleElement(XDocument doc)
