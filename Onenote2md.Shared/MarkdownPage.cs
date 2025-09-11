@@ -11,5 +11,7 @@ namespace Onenote2md.Shared
         public string Title { get; set; }
         public string Content { get; set; }
         public string Filename { get; set; }
+        public DateTime? CreatedDate { get; set; }
+        public DateTime? ModifiedDate { get; set; }
     }
 }

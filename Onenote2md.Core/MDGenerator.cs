@@ -310,6 +310,10 @@ namespace Onenote2md.Core
             var pageTitle = GetPageTitle(doc);
             context.SetPageTitle(pageTitle);
 
+            // Extract page dates
+            var createdDate = GetPageCreatedDate(doc);
+            var modifiedDate = GetPageModifiedDate(doc);
+
             var titleElement = GetTitleElement(doc);
             GenerateChildObjectMD(titleElement, context, 0, mdContent);
 
@@ -327,9 +331,15 @@ namespace Onenote2md.Core
             }
 
 
-            markdownPage.Content = mdContent.ToString();
+            // Generate frontmatter
+            var frontmatter = GenerateFrontmatter(context.GetPageTitle(), createdDate, modifiedDate);
+            var finalContent = frontmatter + mdContent.ToString();
+
+            markdownPage.Content = finalContent;
             markdownPage.Title = context.GetPageTitle();
             markdownPage.Filename = context.GetPageFullPath();
+            markdownPage.CreatedDate = createdDate;
+            markdownPage.ModifiedDate = modifiedDate;
 
             return markdownPage;
         }
@@ -338,23 +348,25 @@ namespace Onenote2md.Core
         {
             var result = new StringBuilder();
 
-            var children = doc.Descendants(ns + rootNodeName).FirstOrDefault();
-            if (children != null && children.HasElements)
+            // Find all OEChildren nodes in the document
+            var childrenNodes = doc.Descendants(ns + rootNodeName).ToList();
+            foreach (var children in childrenNodes)
             {
-                var rootElements = children
-                    .Elements()
-                    .ToList();
-                foreach (var rootElement in rootElements)
+                if (children != null && children.HasElements)
                 {
-                    int level = 0;
-                    GenerateChildObjectMD(rootElement, context, level, result);
+                    var rootElements = children.Elements().ToList();
+                    foreach (var rootElement in rootElements)
+                    {
+                        int level = 0;
+                        GenerateChildObjectMD(rootElement, context, level, result);
+                    }
                 }
+            }
 
-                if (context.HasPairedContent())
-                {
-                    result.Append(context.Get().Content);
-                    context.Reset();
-                }
+            if (context.HasPairedContent())
+            {
+                result.Append(context.Get().Content);
+                context.Reset();
             }
 
             return result.ToString();
@@ -427,6 +439,62 @@ namespace Onenote2md.Core
             var element = doc.Descendants(ns + nodeName).FirstOrDefault();
 
             return element;
+        }
+
+        protected DateTime? GetPageCreatedDate(XDocument doc)
+        {
+            var pageElement = doc.Descendants(ns + "Page").FirstOrDefault();
+            if (pageElement != null)
+            {
+                var dateTimeAttr = GetAttibuteValue(pageElement, "dateTime");
+                if (!string.IsNullOrEmpty(dateTimeAttr))
+                {
+                    if (DateTime.TryParse(dateTimeAttr, out DateTime result))
+                        return result;
+                }
+            }
+            return null;
+        }
+
+        protected DateTime? GetPageModifiedDate(XDocument doc)
+        {
+            var pageElement = doc.Descendants(ns + "Page").FirstOrDefault();
+            if (pageElement != null)
+            {
+                var lastModifiedAttr = GetAttibuteValue(pageElement, "lastModifiedTime");
+                if (!string.IsNullOrEmpty(lastModifiedAttr))
+                {
+                    if (DateTime.TryParse(lastModifiedAttr, out DateTime result))
+                        return result;
+                }
+            }
+            return null;
+        }
+
+        protected string GenerateFrontmatter(string title, DateTime? createdDate, DateTime? modifiedDate)
+        {
+            var frontmatter = new StringBuilder();
+            frontmatter.AppendLine("---");
+            
+            if (!string.IsNullOrEmpty(title))
+            {
+                frontmatter.AppendLine($"title: \"{title.Replace("\"", "\\\"")}\"");
+            }
+
+            if (createdDate.HasValue)
+            {
+                frontmatter.AppendLine($"created: {createdDate.Value:yyyy-MM-ddTHH:mm:ss}");
+            }
+
+            if (modifiedDate.HasValue)
+            {
+                frontmatter.AppendLine($"modified: {modifiedDate.Value:yyyy-MM-ddTHH:mm:ss}");
+            }
+
+            frontmatter.AppendLine("---");
+            frontmatter.AppendLine();
+            
+            return frontmatter.ToString();
         }
 
         protected void GenerateChildObjectMD(
