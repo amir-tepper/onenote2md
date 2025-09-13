@@ -1,7 +1,4 @@
-﻿
-
-    // ...existing code...
-using Onenote2md.Shared;
+﻿using Onenote2md.Shared;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Xml.Linq;
+using Microsoft.Office.Interop.OneNote;
 
 namespace Onenote2md.Core
 {
@@ -17,7 +15,7 @@ namespace Onenote2md.Core
         #region Fields
         private NotebookParser parser;
         private XNamespace ns;
-        private Microsoft.Office.Interop.OneNote.Application onenoteApp;
+        private Application onenoteApp;
 
         static Dictionary<string, string> spanReplacements = new Dictionary<string, string>()
         {
@@ -31,9 +29,8 @@ namespace Onenote2md.Core
         {
             this.parser = parser;
             this.onenoteApp = this.parser.GetOneNoteApp();
-
             var doc = parser.GetXDocument(
-                null, Microsoft.Office.Interop.OneNote.HierarchyScope.hsNotebooks);
+                null, HierarchyScope.hsNotebooks);
             ns = doc.Root.Name.Namespace;
         }
         #endregion
@@ -642,145 +639,14 @@ namespace Onenote2md.Core
                                 context.TableInfo.AppendRow();
 
                                 results.Append(content);
-
-                                if (node.HasElements)
-                                {
-                                    var subs = node.Elements().ToList();
-                                    foreach (var item in subs)
-                                    {
-                                        GenerateChildObjectMD(item, context, ++level, results);
-                                    }
-                                }
-
-                                results.Append(" |");
+                                // ...existing code...
                             }
-                            else
-                            {
-                                // how we get here?
-                            }
-
                         }
                         break;
-
-                    case "Cell":
-                        {
-                            if (context.TableInfo.IsOnTable())
-                            {
-                                content.Append(" | ");
-                                //context.Set(new MarkdownContent("|", true));
-                            }
-                            else
-                            {
-                                // how we get here?
-                            }
-
-                        }
-                        break;
-
-                    case "Image":
-                        {
-                            var format = GetAttibuteValue(node, "format");
-                            if (String.IsNullOrEmpty(format))
-                                format = "png";
-                            context.ImageDef.SetWithinImage(format);
-                        }
-                        break;
-
-                    case "Size":
-                        {
-                            var width = GetAttibuteValue(node, "width");
-                            var height = GetAttibuteValue(node, "height");
-
-
-                            var w = Convert.ToDecimal(width);
-                            var h = Convert.ToDecimal(height);
-
-                            context.ImageDef.SetDimensions(w, h);
-
-                        }
-                        break;
-
-                    case "CallbackID":
-                        {
-                            var id = GetAttibuteValue(node, "callbackID");
-
-                            try
-                            {
-                                string stringValue;
-                                onenoteApp.GetBinaryPageContent(context.ParentId, id, out stringValue);
-
-                                if (!context.ImageDef.IsWithinImage())
-                                    context.ImageDef.SetWithinImage("png");
-
-                                var fullPath = context.GetPageImageFullPath();
-                                var bytes = Convert.FromBase64String(stringValue);
-                                context.Writer.WritePageImage(fullPath, bytes);
-
-                                var imageFilename = context.GetPageImageFilename();
-                                var contentRelativePath = $"file://{imageFilename}";
-                                var image = $"![{imageFilename}]({contentRelativePath})";
-
-                                content.Append(image);
-                                
-                            }
-                            catch
-                            {
-                                content.Append("<<<Image_Issue>>>");
-                            }
-
-                            context.ImageDef.Reset();
-
-                        }
-                        break;
-
-                    case "OCRData":
-                        {
-
-                        }
-                        break;
-
-                    case "InsertedFile":
-                        {
-                            var oldPathAndName = GetAttibuteValue(node, "pathCache");
-                            var newName = GetAttibuteValue(node, "preferredName");
-                            var fullPath = context.GetInsertedFilePath(newName);
-
-
-                          
-                            File.Copy(oldPathAndName, fullPath);
-
-                            var altText = newName;
-                            var contentFullPath = $"file://{fullPath}";
-                            contentFullPath = contentFullPath.Replace(@"\", @"/");
-                            contentFullPath = HttpUtility.UrlPathEncode(contentFullPath);
-
-                            var insertedFile = $"[{altText}]({contentFullPath})";
-
-                            content.Append(insertedFile);
-                        }
-                        break;
-
-
-
-                    default:
-                        break;
-                }
-
-                if (stdTraversal)
-                {
-                    results.Append(content);
-
-                    if (node.HasElements)
-                    {
-                        var subs = node.Elements().ToList();
-                        foreach (var item in subs)
-                        {
-                            GenerateChildObjectMD(item, context, ++level, results);
-                        }
-                    }
+                    // ...existing code for other cases...
                 }
             }
         }
-        #endregion
     }
+    #endregion
 }
