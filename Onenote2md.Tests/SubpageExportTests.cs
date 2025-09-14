@@ -108,4 +108,43 @@ namespace Onenote2md.Tests
             public void WritePageImage(string fullPath, byte[] image) { }
         }
     }
+
+    // Public TestWriter for use in other test classes
+    public class TestWriter : IWriter
+    {
+        public Dictionary<string, string> WrittenFiles { get; } = new Dictionary<string, string>();
+        private readonly Stack<string> _dirs = new Stack<string>();
+
+        public TestWriter() { }
+
+        public void PushDirectory(string dir) => _dirs.Push(dir);
+        
+        public void PopDirectory() 
+        { 
+            if (_dirs.Count > 0) _dirs.Pop(); 
+        }
+        
+        public string GetOutputDirectory() => string.Join("\\", _dirs.Reverse());
+        
+        public void WritePage(MarkdownPage page) 
+        { 
+            WrittenFiles[page.Filename] = page.Content ?? "";
+        }
+        
+        public void WritePageImage(string fullPath, byte[] image) 
+        {
+            WrittenFiles[fullPath] = $"[Image: {image?.Length ?? 0} bytes]";
+        }
+
+        public virtual void WriteFile(string filename, string content)
+        {
+            if (string.IsNullOrEmpty(filename))
+                throw new ArgumentException("Filename cannot be null or empty", nameof(filename));
+            
+            if (content == null)
+                throw new ArgumentNullException(nameof(content));
+
+            WrittenFiles[filename] = content;
+        }
+    }
 }
