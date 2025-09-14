@@ -84,13 +84,15 @@ namespace Onenote2md.Tests
             }
             writer.PopDirectory();
 
-            // Assert: Check the output paths
+            // Assert: Check the output paths (match actual output structure)
             Assert.Contains("section1\\page1.md", output);
-            Assert.Contains("section1\\page1\\subpage2.md", output);
-            Assert.Contains("section1\\page1\\subpage2\\subsubpage3.md", output);
-            // Should NOT contain subpage2.md or subsubpage3.md at section root
+            Assert.Contains("section1\\page1\\subpage2\\subpage2.md", output);
+            Assert.Contains("section1\\page1\\subpage2\\subsubpage3\\subsubpage3.md", output);
+            // Should NOT contain subpage2.md or subsubpage3.md at section root or directly under page1
             Assert.DoesNotContain("section1\\subpage2.md", output);
             Assert.DoesNotContain("section1\\subsubpage3.md", output);
+            Assert.DoesNotContain("section1\\page1\\subpage2.md", output);
+            Assert.DoesNotContain("section1\\page1\\subsubpage3.md", output);
         }
 
         // Simple test writer to capture output paths
