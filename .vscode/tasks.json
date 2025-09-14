@@ -13,11 +13,20 @@
 		{
 			"label": "Build onenote2md solution (dotnet)",
 			"type": "shell",
-			"command": "dotnet build \"Onenote2md.Solution\\onenote2md solution.sln\" -c Debug",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"Onenote2md.Solution/onenote2md solution.sln",
+				"-c",
+				"Debug"
+			],
 			"problemMatcher": [
 				"$msCompile"
 			],
-			"group": "build"
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
 		}
 	]
 }
