@@ -11,7 +11,10 @@
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/Onenote2md.Cmd/bin/Debug/net8.0-windows/Onenote2md.Cmd.dll",
-            "args": [],
+            "args": [
+                "Test",
+                "c:/tempMine/onenote/Test"
+            ],
             "cwd": "${workspaceFolder}/Onenote2md.Cmd",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
