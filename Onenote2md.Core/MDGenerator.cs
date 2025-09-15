@@ -134,7 +134,8 @@ namespace Onenote2md.Core
                 var ns = doc.Root.Name.Namespace;
 
                 var pages = doc.Descendants(ns + "Page")
-                    .Select(p => new {
+                    .Select(p => new
+                    {
                         Id = p.Attribute("ID")?.Value,
                         Name = SanitizeName(p.Attribute("name")?.Value),
                         PageLevel = int.TryParse(p.Attribute("pageLevel")?.Value, out int lvl) ? lvl : 1
@@ -470,7 +471,7 @@ namespace Onenote2md.Core
         {
             var frontmatter = new StringBuilder();
             frontmatter.AppendLine("---");
-            
+
             if (!string.IsNullOrEmpty(title))
             {
                 frontmatter.AppendLine($"title: \"{title.Replace("\"", "\\\"")}\"");
@@ -488,7 +489,7 @@ namespace Onenote2md.Core
 
             frontmatter.AppendLine("---");
             frontmatter.AppendLine();
-            
+
             return frontmatter.ToString();
         }
 
@@ -641,7 +642,20 @@ namespace Onenote2md.Core
                             }
                         }
                         break;
-                    // ...existing code for other cases...
+                        // ...existing code for other cases...
+                }
+                if (stdTraversal)
+                {
+                    results.Append(content);
+
+                    if (node.HasElements)
+                    {
+                        var subs = node.Elements().ToList();
+                        foreach (var item in subs)
+                        {
+                            GenerateChildObjectMD(item, context, ++level, results);
+                        }
+                    }
                 }
             }
         }
