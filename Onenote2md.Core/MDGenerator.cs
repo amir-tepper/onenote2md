@@ -13,9 +13,8 @@ namespace Onenote2md.Core
     public class MDGenerator : IGenerator
     {
         #region Fields
-        private NotebookParser parser;
+        private INotebookParser parser;
         private XNamespace ns;
-        private Application onenoteApp;
 
         static Dictionary<string, string> spanReplacements = new Dictionary<string, string>()
         {
@@ -25,10 +24,9 @@ namespace Onenote2md.Core
         #endregion
 
         #region Constructors
-        public MDGenerator(NotebookParser parser)
+        public MDGenerator(INotebookParser parser)
         {
             this.parser = parser;
-            this.onenoteApp = this.parser.GetOneNoteApp();
             var doc = parser.GetXDocument(
                 null, HierarchyScope.hsNotebooks);
             ns = doc.Root.Name.Namespace;

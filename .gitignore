@@ -35,6 +35,9 @@ bld/
 *.VisualState.xml
 TestResult.xml
 
+# Local VSCode launch configs
+.vscode/launch.local.json
+
 # Build Results of an ATL Project
 [Dd]ebugPS/
 [Rr]eleasePS/

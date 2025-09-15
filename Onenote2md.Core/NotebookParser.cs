@@ -9,7 +9,7 @@ using Microsoft.Office.Interop.OneNote;
 
 namespace Onenote2md.Core
 {
-    public class NotebookParser
+    public class NotebookParser : INotebookParser
     {
         Application onenoteApp;
         XNamespace ns;
@@ -26,7 +26,7 @@ namespace Onenote2md.Core
             ns = doc.Root.Name.Namespace;
         }
 
-        public Application GetOneNoteApp()
+        public object GetOneNoteApp()
         {
             return onenoteApp;
         }
@@ -36,10 +36,10 @@ namespace Onenote2md.Core
             onenoteApp.CloseNotebook(notebookId);
         }
 
-        public XDocument GetXDocument(string parentId, HierarchyScope scope)
+        public XDocument GetXDocument(string parentId, object scope)
         {
             string xml;
-            onenoteApp.GetHierarchy(parentId, scope, out xml);
+            onenoteApp.GetHierarchy(parentId, (HierarchyScope)scope, out xml);
             var doc = XDocument.Parse(xml);
             return doc;
         }
@@ -102,9 +102,9 @@ namespace Onenote2md.Core
 
 
 
-        public string GetObjectId(Microsoft.Office.Interop.OneNote.HierarchyScope scope, string objectName)
+        public string GetObjectId(object scope, string objectName)
         {
-            return GetObjectId(null, scope, objectName);
+            return GetObjectId(null, (HierarchyScope)scope, objectName);
         }
 
         public string GetObjectId(string parentId,
@@ -169,7 +169,7 @@ namespace Onenote2md.Core
 
         public IDictionary<string, string> GetChildObjectMap(
             string parentId,
-            Microsoft.Office.Interop.OneNote.HierarchyScope scope,
+            object scope,
             ObjectType requestedObject)
         {
             var doc = GetXDocument(parentId, scope);
