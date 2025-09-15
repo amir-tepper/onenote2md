@@ -18,6 +18,18 @@
 				"kind": "build",
 				"isDefault": true
 			}
+		},
+		{
+			"label": "test",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"test",
+				"Onenote2md.Solution/onenote2md solution.sln",
+				"-c",
+				"Debug"
+			],
+			"group": "test"
 		}
 	]
 }
