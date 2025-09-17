@@ -96,7 +96,7 @@ namespace Onenote2md.Tests
 
             public string GetBinaryPageContent(string parentId, string id)
             {
-                return null;
+                return string.Empty;
             }
         }
 
