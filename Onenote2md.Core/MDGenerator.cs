@@ -726,7 +726,7 @@ namespace Onenote2md.Core
                                 content.Append(image);
                                 context.ImageDef.Reset();
                             }
-                            catch (Exception ex)
+                            catch
                             {
 
                             }
