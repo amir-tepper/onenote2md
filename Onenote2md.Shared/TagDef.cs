@@ -17,28 +17,40 @@ namespace Onenote2md.Shared
         {
             if (String.IsNullOrEmpty(Name))
                 return MarkdownContent.Empty();
-            else
+           else
             {
-                switch (Name)
+                switch ((TagDefType)int.Parse(Type))
                 {
-                    case "To Do":
-                        return MarkdownContent.SingleContent(" [ ] ");
+                    case TagDefType.ToDo:
+                    case TagDefType.ToDo2:
+                        return MarkdownContent.SingleContent("[ ] ");
 
-                    case "Important":
+                    case TagDefType.Important:
                         return MarkdownContent.SingleContent(":star: ");
 
-                    case "Question":
+                    case TagDefType.Question:
                         return MarkdownContent.SingleContent(":question: ");
 
-                    case "Critical":
+                    case TagDefType.Critical:
                         return MarkdownContent.SingleContent(":exclamation: ");
-                        
-                    
+
+                    case TagDefType.Idea:
+                        return MarkdownContent.SingleContent(":bulb: ");
 
                     default:
                         return MarkdownContent.SingleContent(":red_circle: ");
                 }
             }
         }
+    }
+    
+     public enum TagDefType
+    {
+        ToDo = 0,
+        ToDo2 = 99,
+        Important = 1,
+        Question = 2,
+        Idea = 10,
+        Critical = 12,
     }
 }

@@ -120,7 +120,7 @@ namespace Onenote2md.Shared
 
         public string GetPageFullPath()
         {
-            var outputDirectory = writer.GetOutputDirectory();
+            var outputDirectory = StringHelper.Sanitize(writer.GetOutputDirectory());
             EnsureDirectoryExists(outputDirectory);
 
             var fullPath = Path.Combine(outputDirectory, GetPageFilename());
@@ -129,7 +129,7 @@ namespace Onenote2md.Shared
 
         public string GetInsertedFilePath(string fileName)
         {
-            var outputDirectory = writer.GetOutputDirectory();
+            var outputDirectory = StringHelper.Sanitize(writer.GetOutputDirectory());
             EnsureDirectoryExists(outputDirectory);
 
             var fullPath = Path.Combine(outputDirectory, fileName);
@@ -146,7 +146,7 @@ namespace Onenote2md.Shared
 
             public string GetPageImageFullPath()
         {
-            var outputDirectory = writer.GetOutputDirectory();
+            var outputDirectory = StringHelper.Sanitize(writer.GetOutputDirectory());
             EnsureDirectoryExists(outputDirectory);
             var filename = ImageDef.GetFilename(pageTitle);
 

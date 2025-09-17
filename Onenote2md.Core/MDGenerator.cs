@@ -7,6 +7,7 @@ using System.Text;
 using System.Web;
 using System.Xml.Linq;
 using Microsoft.Office.Interop.OneNote;
+using System.Globalization;
 
 namespace Onenote2md.Core
 {
@@ -77,10 +78,7 @@ namespace Onenote2md.Core
         protected string GetAttibuteValue(XElement element, string attributeName)
         {
             var v = element.Attributes().Where(q => q.Name == attributeName).FirstOrDefault();
-            if (v != null)
-                return v.Value;
-            else
-                return null;
+            return v?.Value;
         }
 
         protected string GetElementValue(XElement element)
@@ -314,6 +312,7 @@ namespace Onenote2md.Core
             GenerateChildObjectMD(titleElement, context, 0, mdContent);
 
 
+//var childenContent = DoGenerateMDRoots("Outline", doc, context); (could be a better fit)
             var childenContent = DoGenerateMDRoots("OEChildren", doc, context);
             if (String.IsNullOrWhiteSpace(childenContent))
             {
@@ -513,11 +512,7 @@ namespace Onenote2md.Core
                                 context.Reset();
                             }
 
-                            if (context.TableInfo.IsOnTable())
-                            {
-
-                            }
-                            else
+                            if (!context.TableInfo.IsOnTable())
                             {
                                 var quickStyleIndex = GetAttibuteValue(node, "quickStyleIndex");
                                 if (!String.IsNullOrEmpty(quickStyleIndex))
@@ -538,17 +533,41 @@ namespace Onenote2md.Core
 
                     case "T":
                         {
-                            string v = ReplaceMultiline(node.Value);
+                             string v = StringHelper.ReplaceMultiline(node.Value);
+                            v = HttpUtility.HtmlDecode(v);
+                            v = StringHelper.ConvertSpanToMd(v);
 
-                            v = ConvertSpanToMd(v);
-                            v = TextReplacement(v);
                             content.Append(v);
                         }
                         break;
 
                     case "Bullet":
                         {
-                            content.Append("- ");
+                            var parentNode = node.Parent;
+                            var parentPreviousNode = parentNode.PreviousNode;
+                            var preText = "";
+                            while (parentNode != null)
+                            {
+                                var quickStyleIndex = parentNode.Attribute("quickStyleIndex");
+                                var children = new List<string> { "h1", "h2", "h3", "h4", "h5" };
+                                if (quickStyleIndex != null && children.Any(quickStyleIndex.Value.Contains))
+                                {
+                                    break;
+                                }
+                                if (parentNode.Name.LocalName.Equals("OEChildren"))
+                                {
+                                    preText += "  ";
+                                }
+                                parentNode = parentNode.Parent;
+                            }
+
+                            if (parentPreviousNode == null ||
+                                NormalizeName(((XElement)parentPreviousNode).Name.ToString()) != "Tag")
+                            {
+                                preText = preText.Substring(2) + "- ";
+                            }
+
+                            content.Append(preText);
                         }
                         break;
 
@@ -560,12 +579,23 @@ namespace Onenote2md.Core
 
                     case "Tag":
                         {
+                            var parentNode = node.Parent;
+                            while (parentNode != null)
+                            {
+                                if (parentNode.Name.LocalName.Equals("OEChildren"))
+                                {
+                                    content.Append("  ");
+                                }
+                                parentNode = parentNode.Parent;
+                            }
+
                             var tagIndex = GetAttibuteValue(node, "index");
                             var tagDef = context.GetTagDef(tagIndex);
 
                             if (tagDef != null)
                             {
-                                if (tagDef.Name.Equals("To Do", StringComparison.InvariantCultureIgnoreCase))
+                                var tagDefType = (TagDefType)int.Parse(tagDef.Type);
+                                if (TagDefType.ToDo.Equals(tagDefType) || TagDefType.ToDo2.Equals(tagDefType))
                                 {
                                     var completed = GetAttibuteValue(node, "completed");
                                     if (completed == "true")
@@ -640,6 +670,91 @@ namespace Onenote2md.Core
                                 results.Append(content);
                                 // ...existing code...
                             }
+                        }
+                        break;
+
+                        case "Cell":
+                        {
+                            if (context.TableInfo.IsOnTable())
+                            {
+                                content.Append(" | ");
+                                //context.Set(new MarkdownContent("|", true));
+                            }
+                        }
+                        break;
+
+                    case "Image":
+                        {
+                            var format = GetAttibuteValue(node, "format");
+                            if (String.IsNullOrEmpty(format))
+                                format = "png";
+                            context.ImageDef.SetWithinImage(format);
+                        }
+                        break;
+
+                    case "Size":
+                        {
+                            var width = GetAttibuteValue(node, "width");
+                            var height = GetAttibuteValue(node, "height");
+
+                            var w = Convert.ToDecimal(width, CultureInfo.InvariantCulture);
+                            var h = Convert.ToDecimal(height, CultureInfo.InvariantCulture);
+
+                            context.ImageDef.SetDimensions(w, h);
+                        }
+                        break;
+
+                    case "CallbackID":
+                        {
+                            var id = GetAttibuteValue(node, "callbackID");
+
+                            try
+                            {
+                                string stringValue = this.parser.GetBinaryPageContent(context.ParentId, id);
+
+                                if (!context.ImageDef.IsWithinImage())
+                                    context.ImageDef.SetWithinImage("png");
+
+                                var fullPath = context.GetPageImageFullPath();
+                                var bytes = Convert.FromBase64String(stringValue);
+                                context.Writer.WritePageImage(fullPath, bytes);
+
+                                var imageFilename = context.GetPageImageFilename();
+                                var contentRelativePath = $"file://{imageFilename}";
+                                var image = $"![{imageFilename}]({contentRelativePath})";
+
+                                content.Append(image);
+                                context.ImageDef.Reset();
+                            }
+                            catch (Exception ex)
+                            {
+
+                            }
+                        }
+                        break;
+
+                    case "OCRData":
+                        {
+
+                        }
+                        break;
+
+                    case "InsertedFile":
+                        {
+                            var oldPathAndName = GetAttibuteValue(node, "pathCache");
+                            var newName = GetAttibuteValue(node, "preferredName");
+                            var fullPath = context.GetInsertedFilePath(newName);
+
+                            File.Copy(oldPathAndName, fullPath);
+
+                            var altText = newName;
+                            var contentFullPath = $"file://{fullPath}";
+                            contentFullPath = contentFullPath.Replace(@"\", @"/");
+                            contentFullPath = HttpUtility.UrlPathEncode(contentFullPath);
+
+                            var insertedFile = $"[{altText}]({contentFullPath})";
+
+                            content.Append(insertedFile);
                         }
                         break;
                         // ...existing code for other cases...

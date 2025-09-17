@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.Office.Interop.OneNote;
+using System.Net.Http.Headers;
 
 namespace Onenote2md.Core
 {
@@ -318,7 +319,10 @@ namespace Onenote2md.Core
             return xml;
         }
 
-
-
+        public string GetBinaryPageContent(string parentId, string id)
+        {
+            onenoteApp.GetBinaryPageContent(parentId, id, out var stringValue);
+            return stringValue;
+        }
     }
 }

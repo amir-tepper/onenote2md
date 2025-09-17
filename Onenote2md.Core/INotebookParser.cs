@@ -30,5 +30,8 @@ namespace Onenote2md.Core
         /// Closes a OneNote notebook
         /// </summary>
         void Close(string notebookId);
+
+        
+        string GetBinaryPageContent(string parentId, string id);
     }
 }
